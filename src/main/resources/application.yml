@@ -8,3 +8,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 15MB
+      location: E:/JavaProjects/ourtube/upload/videos/
