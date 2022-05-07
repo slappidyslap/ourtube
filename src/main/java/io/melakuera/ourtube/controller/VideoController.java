@@ -2,8 +2,9 @@ package io.melakuera.ourtube.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 import io.melakuera.ourtube.dto.UploadVideoReqDto;
 import io.melakuera.ourtube.entity.Video;
@@ -20,6 +21,8 @@ public class VideoController {
 	@Value("${spring.servlet.multipart.location}")
 	private String pathToVideo;
 	
+	private List<Video> videos = new ArrayList<>();
+	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public void uploadVideo(
@@ -30,9 +33,17 @@ public class VideoController {
 		file.transferTo(new File(pathToVideo+file.getOriginalFilename()));
 		Video video = new Video();
 		video.setId(new Random().nextLong(100, 999));
+		video.setFileName(file.getOriginalFilename());
 		video.setTitle(dto.getTitle());
 		video.setDescription(dto.getDescription());
-		video.setTags(dto.getTags());;
+		video.setTags(dto.getTags());
+		videos.add(video);
+		System.out.println(video);
+	}
+	
+	@GetMapping
+	public List<Video> showVideo() {
 		
+		return videos;
 	}
 }

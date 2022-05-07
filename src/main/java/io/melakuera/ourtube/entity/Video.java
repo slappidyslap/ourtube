@@ -17,6 +17,7 @@ public class Video {
 	private Long id;
 	private String title;
 	private String description;
+	private String fileName;
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
@@ -25,7 +26,6 @@ public class Video {
 	private Long viewCount;
 	@ElementCollection
 	private Set<String> tags;
-	private String url;
 	@Enumerated(EnumType.STRING)
 	private VideoStatus videoStatus;
 	private String thumbnailUrl;
