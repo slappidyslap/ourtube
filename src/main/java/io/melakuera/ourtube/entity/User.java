@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,21 +36,21 @@ public class User {
 			inverseJoinColumns = @JoinColumn(name = "subscriber_id"))
 	@ToString.Exclude
 	private Set<User> subscribers;
-	@OneToMany(orphanRemoval = true)
+	@OneToMany
 	@ToString.Exclude
-	private Set<Video> likedVideos;
-	@OneToMany(orphanRemoval = true)
+	private Set<Video> likedVideos = new LinkedHashSet<>();
+	@OneToMany
 	@ToString.Exclude
-	private Set<Video> dislikedVideos;
-	@OneToMany(orphanRemoval = true)
+	private Set<Video> dislikedVideos = new LinkedHashSet<>();
+	@OneToMany
 	@ToString.Exclude
 	private Set<Video> viewedVideos;
-	@OneToMany(orphanRemoval = true)
+	@OneToMany
 	@ToString.Exclude
-	private Set<Video> likedComment;
-	@OneToMany(orphanRemoval = true)
+	private Set<Video> likedComment = new LinkedHashSet<>();
+	@OneToMany
 	@ToString.Exclude
-	private Set<Video> dislikedComment;
+	private Set<Video> dislikedComment = new LinkedHashSet<>();
 
 	@Override
 	public boolean equals(Object o) {

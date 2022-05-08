@@ -20,6 +20,7 @@ import java.util.List;
 @Slf4j
 public class VideoService {
 
+	private final UserService userService;
 	private final FileService fileService;
 	private final VideoRepo videoRepo;
 	private final UserRepo userRepo;
@@ -121,7 +122,7 @@ public class VideoService {
 		commentRepo.deleteById(commentId);
 	}
 
-	public List<Comment> findAllCommentsByVideoId(Long videoId) {
+	public List<Comment> findAllVideoCommentsByVideoId(Long videoId) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
 				new IllegalArgumentException(
@@ -132,4 +133,108 @@ public class VideoService {
 	}
 
 	//====================================
+
+	public String likeToVideo(Long videoId, User user) {
+		// Находим видео по id, иначе ошибка
+		Video video = videoRepo.findById(videoId).orElseThrow(() ->
+				new IllegalArgumentException(
+						String.format("Видео %s не существует", videoId)
+				));
+		// Результат для вывода
+		StringBuilder result = new StringBuilder();
+
+		// Получаем кол-во лайков и дизлайков у этого видоса
+		long likesCount = video.getLikesCount();
+		long dislikesCount = video.getDislikesCount();
+
+		// Если в это видео авторизованный юзер не ставил лайк
+		if (!userService.isLikedVideo(videoId, user)) {
+
+			// И если авторизованный юзер уже ставил дизлайк
+			if (userService.isDislikedVideo(videoId, user)) {
+				// То убираем дизлайк у видео
+				userService.removeVideosDislike(videoId, user);
+
+				// И декрементируем кол-во дизлайков у видео
+				video.setDislikesCount(--dislikesCount);
+
+				result.append(String.format("Дизлайк к видео %s убран\n", videoId));
+			}
+			// И тогда ставим лайк
+			userService.likeToVideo(video, user);
+
+			// И инкрементируем кол-во лайков у видео
+			video.setLikesCount(++likesCount);
+
+			// Результат
+			result.append(String.format("Лайк к видео %s поставлен", videoId));
+
+		} else {
+			// Иначе юзер ставил лайк, тогда убираем лайк у видео
+			userService.removeVideosLike(videoId, user);
+
+			// И декрементируем кол-во лайков у видео
+			video.setLikesCount(--likesCount);
+
+			// Результат
+			result.append(String.format("Лайк к видео %s убран", videoId));
+		}
+
+		// Сохраняем видео
+		videoRepo.save(video);
+
+		return result.toString();
+	}
+
+	public String dislikeToVideo(Long videoId, User user) {
+		// Находим видео по id, иначе ошибка
+		Video video = videoRepo.findById(videoId).orElseThrow(() ->
+				new IllegalArgumentException(
+						String.format("Видео %s не существует", videoId)
+				));
+		// Результат для вывода
+		StringBuilder result = new StringBuilder();
+
+		// Получаем кол-во дизлайков и лайков у этого видоса
+		long dislikesCount = video.getDislikesCount();
+		long likesCount = video.getLikesCount();
+
+		// Если в это видео авторизованный юзер не ставил дизлайк
+		if (!userService.isDislikedVideo(videoId, user)) {
+
+			// И если авторизованный юзер уже ставил лайк
+			if (userService.isLikedVideo(videoId, user)) {
+				// То убираем лайк у видео
+				userService.removeVideosLike(videoId, user);
+
+				// И декрементируем кол-во лайков у видео
+				video.setLikesCount(--likesCount);
+
+				result.append(String.format("Лайк к видео %s убран\n", videoId));
+			}
+			// И тогда ставим дизлайк
+			userService.disLikeToVideo(video, user);
+
+			// И инкрементируем кол-во дизлайков у видео
+			video.setDislikesCount(++dislikesCount);
+
+			// Результат
+			result.append(String.format("Дизлайк к видео %s поставлен", videoId));
+
+		} else {
+			// Иначе юзер ставил дизлайк, тогда убираем дизлайк у видео
+			userService.removeVideosDislike(videoId, user);
+
+			// И декрементируем кол-во дизлайков у видео
+			video.setDislikesCount(--dislikesCount);
+
+			// Результат
+			result.append(String.format("Дизлайк к видео %s убран", videoId));
+		}
+
+		// Сохраняем видео
+		videoRepo.save(video);
+
+		return result.toString();
+	}
 }

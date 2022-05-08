@@ -7,6 +7,7 @@ import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
 import io.melakuera.ourtube.service.VideoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,10 +17,11 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/videos")
 @RequiredArgsConstructor
+@Slf4j
 public class VideoController {
 
 	private final VideoService videoService;
-	
+
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	Video newVideo(UploadVideoReqDto dto) {
@@ -34,7 +36,7 @@ public class VideoController {
 	String deleteVideo(@PathVariable Long videoId) {
 		videoService.deleteById(videoId);
 
-		return String.format("Видео %s удалено",videoId);
+		return String.format("Видео %s удалено", videoId);
 	}
 
 	// patch
@@ -80,6 +82,33 @@ public class VideoController {
 
 	@GetMapping("/{videoId}/comment")
 	List<Comment> getAllComments(@PathVariable Long videoId) {
-		return videoService.findAllCommentsByVideoId(videoId);
+		return videoService.findAllVideoCommentsByVideoId(videoId);
+	}
+
+	//=====================================================
+
+	// Mock User, для тестинга
+	// Тут надо, потому что нужен один и тот же юзер
+	User user1 = new User();
+	{
+		user1.setUsername("Dastan");
+	}
+
+	@PostMapping("/{videoId}/like")
+	String likeToVideo(@PathVariable Long videoId) {
+
+		String r = videoService.likeToVideo(videoId, user1);
+		log.info(user1.getLikedVideos().toString());
+		log.info(user1.getDislikedVideos().toString());
+		return r;
+	}
+
+	@PostMapping("/{videoId}/dislike")
+	String dislikeToVideo(@PathVariable Long videoId) {
+
+		String r = videoService.dislikeToVideo(videoId, user1);
+		log.info(user1.getLikedVideos().toString());
+		log.info(user1.getDislikedVideos().toString());
+		return r;
 	}
 }
