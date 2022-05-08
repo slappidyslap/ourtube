@@ -1,6 +1,10 @@
 package io.melakuera.ourtube.entity;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -16,14 +20,20 @@ public class Comment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@ManyToOne
-	@JoinColumn(name = "video_id")
+	@JoinColumn(name = "video_id", nullable = false)
 	private Video video;
+	@Column(length = 1024, nullable = false)
 	private String content;
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 	private long likesCount;
 	private long dislikesCount;
+
+	@JsonBackReference
+	public void setVideo(Video video) {
+		this.video = video;
+	}
 
 	@Override
 	public boolean equals(Object o) {
