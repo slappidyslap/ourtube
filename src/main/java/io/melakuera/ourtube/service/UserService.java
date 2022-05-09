@@ -14,40 +14,50 @@ public class UserService {
 
 	private final UserRepo userRepo;
 
-	public boolean isLikedVideo(Long videoId, User user) {
-		return user.getLikedVideos().stream().anyMatch(it ->
-				it.getId().equals(videoId));
-	}
+//	public boolean isLikedVideo(Long videoId, User user) {
+//		return user.getLikedVideos().stream().anyMatch(it ->
+//				it.getId().equals(videoId));
+//	}
+//
+//	public boolean isDislikedVideo(Long videoId, User user) {
+//		return user.getDislikedVideos().stream().anyMatch(it ->
+//				it.getId().equals(videoId));
+//	}
 
-	public boolean isDislikedVideo(Long videoId, User user) {
-		return user.getDislikedVideos().stream().anyMatch(it ->
-				it.getId().equals(videoId));
-	}
+//	public void removeVideosLike(Long videoId, User user) {
+//		user.getLikedVideos().removeIf(it -> it.getId().equals(videoId));
+//
+//		userRepo.save(user);
+//		System.out.println("22222222222222222=================================================");
+//
+//		User user2 = userRepo.findById(2L).orElse(null);
+//		System.out.println(user2);
+//		assert user2 != null;
+//		System.out.println(user2.getLikedVideos());
+//	}
 
-	public void removeVideosLike(Long videoId, User user) {
-		user.getLikedVideos().removeIf(it -> it.getId().equals(videoId));
+//	public void removeVideosDislike(Long videoId, User user) {
+//		user.getDislikedVideos().removeIf(it -> it.getId().equals(videoId));
+//
+//		userRepo.save(user);
+//	}
 
-		userRepo.save(user);
-	}
+//	public void likeToVideo(Video video, User user) {
+//		user.getLikedVideos().add(video);
+//
+//		userRepo.save(user);
+//		System.out.println("1111111111111=================================================");
+//
+//		User user2 = userRepo.findById(2L).orElse(null);
+//		System.out.println(user2);
+//		assert user2 != null;
+//		System.out.println(user2.getLikedVideos());
+//	}
 
-	public void removeVideosDislike(Long videoId, User user) {
-		user.getDislikedVideos().removeIf(it -> it.getId().equals(videoId));
-
-		userRepo.save(user);
-	}
-
-	public void likeToVideo(Video video, User user) {
-		user.getLikedVideos().add(video);
-
-		User user1 = userRepo.save(user);
-		log.info(user1.toString());
-		log.info(user1.getLikedComment().toString());
-	}
-
-	public void disLikeToVideo(Video video, User user) {
-		user.getDislikedVideos().add(video);
-
-		userRepo.save(user);
-	}
+//	public void disLikeToVideo(Video video, User user) {
+//		user.getDislikedVideos().add(video);
+//
+//		userRepo.save(user);
+//	}
 }
 

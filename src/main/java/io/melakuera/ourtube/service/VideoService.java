@@ -11,6 +11,7 @@ import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.repo.VideoRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -148,12 +149,12 @@ public class VideoService {
 		long dislikesCount = video.getDislikesCount();
 
 		// Если в это видео авторизованный юзер не ставил лайк
-		if (!userService.isLikedVideo(videoId, user)) {
+		if (!user.isLikedVideo(videoId)) {
 
 			// И если авторизованный юзер уже ставил дизлайк
-			if (userService.isDislikedVideo(videoId, user)) {
+			if (user.isDislikedVideo(videoId)) {
 				// То убираем дизлайк у видео
-				userService.removeVideosDislike(videoId, user);
+				user.removeVideosDislike(videoId);
 
 				// И декрементируем кол-во дизлайков у видео
 				video.setDislikesCount(--dislikesCount);
@@ -161,7 +162,7 @@ public class VideoService {
 				result.append(String.format("Дизлайк к видео %s убран\n", videoId));
 			}
 			// И тогда ставим лайк
-			userService.likeToVideo(video, user);
+			user.likeToVideo(video);
 
 			// И инкрементируем кол-во лайков у видео
 			video.setLikesCount(++likesCount);
@@ -171,7 +172,7 @@ public class VideoService {
 
 		} else {
 			// Иначе юзер ставил лайк, тогда убираем лайк у видео
-			userService.removeVideosLike(videoId, user);
+			user.removeVideosLike(videoId);
 
 			// И декрементируем кол-во лайков у видео
 			video.setLikesCount(--likesCount);
@@ -181,8 +182,11 @@ public class VideoService {
 		}
 
 		// Сохраняем видео
+		userRepo.save(user);
 		videoRepo.save(video);
-
+//		System.out.println("//=================================================");
+//		System.out.println(user);
+//		System.out.println(user.getLikedVideos());
 		return result.toString();
 	}
 
@@ -200,12 +204,12 @@ public class VideoService {
 		long likesCount = video.getLikesCount();
 
 		// Если в это видео авторизованный юзер не ставил дизлайк
-		if (!userService.isDislikedVideo(videoId, user)) {
+		if (!user.isDislikedVideo(videoId)) {
 
 			// И если авторизованный юзер уже ставил лайк
-			if (userService.isLikedVideo(videoId, user)) {
+			if (user.isLikedVideo(videoId)) {
 				// То убираем лайк у видео
-				userService.removeVideosLike(videoId, user);
+				user.removeVideosLike(videoId);
 
 				// И декрементируем кол-во лайков у видео
 				video.setLikesCount(--likesCount);
@@ -213,7 +217,7 @@ public class VideoService {
 				result.append(String.format("Лайк к видео %s убран\n", videoId));
 			}
 			// И тогда ставим дизлайк
-			userService.disLikeToVideo(video, user);
+			user.disLikeToVideo(video);
 
 			// И инкрементируем кол-во дизлайков у видео
 			video.setDislikesCount(++dislikesCount);
@@ -223,7 +227,7 @@ public class VideoService {
 
 		} else {
 			// Иначе юзер ставил дизлайк, тогда убираем дизлайк у видео
-			userService.removeVideosDislike(videoId, user);
+			user.removeVideosDislike(videoId);
 
 			// И декрементируем кол-во дизлайков у видео
 			video.setDislikesCount(--dislikesCount);
@@ -233,6 +237,7 @@ public class VideoService {
 		}
 
 		// Сохраняем видео
+		userRepo.save(user);
 		videoRepo.save(video);
 
 		return result.toString();

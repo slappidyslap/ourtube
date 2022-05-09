@@ -36,21 +36,49 @@ public class User {
 			inverseJoinColumns = @JoinColumn(name = "subscriber_id"))
 	@ToString.Exclude
 	private Set<User> subscribers;
-	@OneToMany
+	@ManyToMany
 	@ToString.Exclude
 	private Set<Video> likedVideos = new LinkedHashSet<>();
-	@OneToMany
+	@ManyToMany
 	@ToString.Exclude
 	private Set<Video> dislikedVideos = new LinkedHashSet<>();
-	@OneToMany
+	@ManyToMany
 	@ToString.Exclude
 	private Set<Video> viewedVideos;
-	@OneToMany
+	@ManyToMany
 	@ToString.Exclude
 	private Set<Video> likedComment = new LinkedHashSet<>();
-	@OneToMany
+	@OneToMany(cascade = {
+			CascadeType.DETACH, CascadeType.MERGE,
+			CascadeType.PERSIST,CascadeType.REFRESH})
 	@ToString.Exclude
 	private Set<Video> dislikedComment = new LinkedHashSet<>();
+
+	public boolean isLikedVideo(long videoId) {
+		return likedVideos.stream().anyMatch(it ->
+				it.getId().equals(videoId));
+	}
+
+	public boolean isDislikedVideo(long videoId) {
+		return dislikedVideos.stream().anyMatch(it ->
+				it.getId().equals(videoId));
+	}
+
+	public void removeVideosDislike(Long videoId) {
+		dislikedVideos.removeIf(it -> it.getId().equals(videoId));
+	}
+
+	public void removeVideosLike(Long videoId) {
+		likedVideos.removeIf(it -> it.getId().equals(videoId));
+	}
+
+	public void likeToVideo(Video video) {
+		likedVideos.add(video);
+	}
+
+	public void disLikeToVideo(Video video) {
+		dislikedVideos.add(video);
+	}
 
 	@Override
 	public boolean equals(Object o) {

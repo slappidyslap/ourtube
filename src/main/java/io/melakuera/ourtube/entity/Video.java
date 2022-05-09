@@ -3,9 +3,11 @@ package io.melakuera.ourtube.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Entity
 @Getter
@@ -24,9 +26,9 @@ public class Video {
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
-	private Long likesCount = 0L;
-	private Long dislikesCount = 0L;
-	private Long viewCount = 0L;
+	private long likesCount = 0;
+	private long dislikesCount = 0;
+	private long viewCount = 0;
 	@ElementCollection
 	private Set<String> tags;
 	@Column(nullable = false)

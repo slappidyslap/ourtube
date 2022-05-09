@@ -5,6 +5,7 @@ import io.melakuera.ourtube.dto.UploadVideoReqDto;
 import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
+import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.Set;
 public class VideoController {
 
 	private final VideoService videoService;
+	private final UserRepo userRepo;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -92,11 +94,12 @@ public class VideoController {
 	User user1 = new User();
 	{
 		user1.setUsername("Dastan");
+
 	}
 
 	@PostMapping("/{videoId}/like")
 	String likeToVideo(@PathVariable Long videoId) {
-
+		userRepo.save(user1);
 		String r = videoService.likeToVideo(videoId, user1);
 		log.info(user1.getLikedVideos().toString());
 		log.info(user1.getDislikedVideos().toString());
@@ -110,5 +113,10 @@ public class VideoController {
 		log.info(user1.getLikedVideos().toString());
 		log.info(user1.getDislikedVideos().toString());
 		return r;
+	}
+
+	@GetMapping("/test")
+	Set<Video> test() {
+		return userRepo.findById(2L).orElse(null).getLikedVideos();
 	}
 }
