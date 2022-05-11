@@ -114,9 +114,4 @@ public class VideoController {
 		log.info(user1.getDislikedVideos().toString());
 		return r;
 	}
-
-	@GetMapping("/test")
-	Set<Video> test() {
-		return userRepo.findById(2L).orElse(null).getLikedVideos();
-	}
 }

@@ -184,9 +184,6 @@ public class VideoService {
 		// Сохраняем видео
 		userRepo.save(user);
 		videoRepo.save(video);
-//		System.out.println("//=================================================");
-//		System.out.println(user);
-//		System.out.println(user.getLikedVideos());
 		return result.toString();
 	}
 

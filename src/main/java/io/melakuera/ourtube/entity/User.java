@@ -7,9 +7,9 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -29,30 +29,30 @@ public class User {
 			joinColumns = @JoinColumn(name = "subscriber_id"),
 			inverseJoinColumns = @JoinColumn(name = "subscription_id"))
 	@ToString.Exclude
-	private Set<User> subscriptions;
+	private List<User> subscriptions;
 	@ManyToMany
 	@JoinTable(name = "subscriber_subscription",
 			joinColumns = @JoinColumn(name = "subscription_id"),
 			inverseJoinColumns = @JoinColumn(name = "subscriber_id"))
 	@ToString.Exclude
-	private Set<User> subscribers;
+	private List<User> subscribers;
 	@ManyToMany
 	@ToString.Exclude
-	private Set<Video> likedVideos = new LinkedHashSet<>();
+	private List<Video> likedVideos = new ArrayList<>();
 	@ManyToMany
 	@ToString.Exclude
-	private Set<Video> dislikedVideos = new LinkedHashSet<>();
+	private List<Video> dislikedVideos = new ArrayList<>();
 	@ManyToMany
 	@ToString.Exclude
-	private Set<Video> viewedVideos;
+	private List<Video> viewedVideos;
 	@ManyToMany
 	@ToString.Exclude
-	private Set<Video> likedComment = new LinkedHashSet<>();
+	private List<Comment> likedComment = new ArrayList<>();
 	@OneToMany(cascade = {
 			CascadeType.DETACH, CascadeType.MERGE,
 			CascadeType.PERSIST,CascadeType.REFRESH})
 	@ToString.Exclude
-	private Set<Video> dislikedComment = new LinkedHashSet<>();
+	private List<Comment> dislikedComment = new ArrayList<>();
 
 	public boolean isLikedVideo(long videoId) {
 		return likedVideos.stream().anyMatch(it ->
