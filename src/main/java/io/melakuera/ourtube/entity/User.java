@@ -47,12 +47,10 @@ public class User {
 	private List<Video> viewedVideos;
 	@ManyToMany
 	@ToString.Exclude
-	private List<Comment> likedComment = new ArrayList<>();
-	@OneToMany(cascade = {
-			CascadeType.DETACH, CascadeType.MERGE,
-			CascadeType.PERSIST,CascadeType.REFRESH})
+	private List<Comment> likedComments = new ArrayList<>();
+	@ManyToMany
 	@ToString.Exclude
-	private List<Comment> dislikedComment = new ArrayList<>();
+	private List<Comment> dislikedComments = new ArrayList<>();
 
 	public boolean isLikedVideo(long videoId) {
 		return likedVideos.stream().anyMatch(it ->
@@ -64,20 +62,46 @@ public class User {
 				it.getId().equals(videoId));
 	}
 
-	public void removeVideosDislike(Long videoId) {
+	public void removeVideosDislike(long videoId) {
 		dislikedVideos.removeIf(it -> it.getId().equals(videoId));
 	}
 
-	public void removeVideosLike(Long videoId) {
+	public void removeVideosLike(long videoId) {
 		likedVideos.removeIf(it -> it.getId().equals(videoId));
 	}
 
-	public void likeToVideo(Video video) {
+	public void likeVideo(Video video) {
 		likedVideos.add(video);
 	}
 
-	public void disLikeToVideo(Video video) {
+	public void dislikeVideo(Video video) {
 		dislikedVideos.add(video);
+	}
+
+	public boolean isLikedComment(long commentId) {
+		return likedComments.stream().anyMatch(it ->
+				it.getId().equals(commentId));
+	}
+
+	public boolean isDislikedComment(long commentId) {
+		return dislikedComments.stream().anyMatch(it ->
+				it.getId().equals(commentId));
+	}
+
+	public void removeCommentsDislike(long commentId) {
+		dislikedComments.removeIf(it -> it.getId().equals(commentId));
+	}
+
+	public void removeCommentsLike(long commentId) {
+		likedComments.removeIf(it -> it.getId().equals(commentId));
+	}
+
+	public void likeComment(Comment comment) {
+		likedComments.add(comment);
+	}
+
+	public void dislikeComment(Comment comment) {
+		dislikedComments.add(comment);
 	}
 
 	@Override

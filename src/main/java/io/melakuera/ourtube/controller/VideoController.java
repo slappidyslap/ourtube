@@ -18,11 +18,9 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/videos")
 @RequiredArgsConstructor
-@Slf4j
 public class VideoController {
 
 	private final VideoService videoService;
-	private final UserRepo userRepo;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -35,7 +33,7 @@ public class VideoController {
 	}
 
 	@DeleteMapping("/{videoId}")
-	String deleteVideo(@PathVariable Long videoId) {
+	String deleteVideo(@PathVariable long videoId) {
 		videoService.deleteById(videoId);
 
 		return String.format("Видео %s удалено", videoId);
@@ -54,17 +52,17 @@ public class VideoController {
 	}
 
 	@GetMapping("/{videoId}")
-	Video getVideoById(@PathVariable Long videoId) {
+	Video getVideoById(@PathVariable long videoId) {
 		return videoService.findById(videoId);
 	}
 
 	//=====================================================
 
 
-	@PostMapping("/{videoId}/comment")
+	@PostMapping("/{videoId}/comments")
 	@ResponseStatus(HttpStatus.CREATED)
 	Comment commentVideo(
-			@PathVariable Long videoId,
+			@PathVariable long videoId,
 			CommentReqDto dto) {
 		// Mock User, для тестинга
 		User user = new User();
@@ -73,17 +71,17 @@ public class VideoController {
 		return videoService.addComment(videoId, dto, user);
 	}
 
-	@DeleteMapping("/{videoId}/comment/{commentId}")
+	@DeleteMapping("/{videoId}/comments/{commentId}")
 	String deleteComment(
-			@PathVariable Long videoId,
-			@PathVariable Long commentId) {
+			@PathVariable long videoId,
+			@PathVariable long commentId) {
 		videoService.deleteCommentById(videoId, commentId);
 
 		return String.format("Коммент %s удален", videoId);
 	}
 
-	@GetMapping("/{videoId}/comment")
-	List<Comment> getAllComments(@PathVariable Long videoId) {
+	@GetMapping("/{videoId}/comments")
+	List<Comment> getAllComments(@PathVariable long videoId) {
 		return videoService.findAllVideoCommentsByVideoId(videoId);
 	}
 
@@ -98,20 +96,36 @@ public class VideoController {
 	}
 
 	@PostMapping("/{videoId}/like")
-	String likeToVideo(@PathVariable Long videoId) {
-		userRepo.save(user1);
-		String r = videoService.likeToVideo(videoId, user1);
-		log.info(user1.getLikedVideos().toString());
-		log.info(user1.getDislikedVideos().toString());
-		return r;
+	String likeVideo(@PathVariable long videoId) {
+		return videoService.likeVideo(videoId, user1);
 	}
 
 	@PostMapping("/{videoId}/dislike")
-	String dislikeToVideo(@PathVariable Long videoId) {
+	String dislikeVideo(@PathVariable long videoId) {
+		return videoService.dislikeVideo(videoId, user1);
+	}
 
-		String r = videoService.dislikeToVideo(videoId, user1);
-		log.info(user1.getLikedVideos().toString());
-		log.info(user1.getDislikedVideos().toString());
-		return r;
+	//=====================================================
+
+	// Mock User, для тестинга
+	// Тут надо, потому что нужен один и тот же юзер
+	User user2 = new User();
+	{
+		user2.setUsername("Salman");
+
+	}
+
+	@PostMapping("/{videoId}/comments/{commentId}/like")
+	String likeComment(
+			@PathVariable long videoId,
+			@PathVariable long commentId) {
+		return videoService.likeComment(videoId, commentId, user2);
+	}
+
+	@PostMapping("/{videoId}/comments/{commentId}/dislike")
+	String dislikeComment(
+			@PathVariable long videoId,
+			@PathVariable long commentId) {
+		return videoService.dislikeComment(videoId, commentId, user2);
 	}
 }
