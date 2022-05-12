@@ -7,6 +7,8 @@ import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
 import io.melakuera.ourtube.entity.VideoStatus;
+import io.melakuera.ourtube.exception.CommentNotFoundException;
+import io.melakuera.ourtube.exception.VideoNotFoundException;
 import io.melakuera.ourtube.repo.CommentRepo;
 import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.repo.VideoRepo;
@@ -60,17 +62,15 @@ public class VideoService {
 		}
 		// Иначе ошибка
 		else {
-			throw new IllegalArgumentException(
-					String.format("Видео %s не существует", videoId));
+			throw new VideoNotFoundException(videoId);
 		}
 	}
 
 	public Video editVideo(long videoId, EditVideoReqDto dto) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Заменяем обложку этого видоса
 		String thumbnailName = fileService.editThumbnail(
 				video.getThumbnailName(), dto.getThumbnail());
@@ -96,9 +96,8 @@ public class VideoService {
 	public Video findById(Long videoId) {
 		// Ошибка если таковое видео не существует
 		return videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 	}
 
 	//====================================
@@ -107,9 +106,8 @@ public class VideoService {
 
 		// Получаем видeo по id
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Создаем коммент соответствующему видео
 		Comment comment = new Comment();
 		comment.setContent(dto.getContent());
@@ -132,15 +130,14 @@ public class VideoService {
 	public void deleteCommentById(Long videoId, Long commentId) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 
 		// Находим у это видоса коммент по id, иначе ошибка
 		video.getComments().stream().filter(it ->
 				it.getId().equals(commentId)).findFirst().orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Коммент %s не существует", commentId)));
+				new CommentNotFoundException(commentId)
+		);
 
 		// Если нашлось, то удаляем этот коммент
 		commentRepo.deleteById(commentId);
@@ -150,15 +147,13 @@ public class VideoService {
 			long videoId, long commentId, CommentReqDto dto) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Находим коммент по id, иначе ошибка
 		Comment comment = video.getComments().stream().filter(it ->
 				it.getId().equals(commentId)).findFirst().orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Коммент %s не существует", commentId)
-				));
+				new CommentNotFoundException(commentId)
+		);
 		// Изменяем текущий коммент на основе dto
 		comment.setContent(dto.getContent());
 
@@ -169,9 +164,8 @@ public class VideoService {
 	public List<Comment> findAllVideoCommentsByVideoId(Long videoId) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Возвращаем его комменты
 		return video.getComments();
 	}
@@ -184,9 +178,8 @@ public class VideoService {
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Результат для вывода
 		StringBuilder result = new StringBuilder();
 
@@ -240,9 +233,8 @@ public class VideoService {
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Результат для вывода
 		StringBuilder result = new StringBuilder();
 
@@ -296,15 +288,13 @@ public class VideoService {
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Находим коммент по id, иначе ошибка
 		Comment comment = video.getComments().stream().filter(it ->
 				it.getId().equals(commentId)).findFirst().orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Коммент %s не существует", commentId)
-				));
+				new CommentNotFoundException(commentId)
+		);
 		// Строка для вывода результата
 		StringBuilder result = new StringBuilder();
 
@@ -358,15 +348,13 @@ public class VideoService {
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
-				new IllegalArgumentException(
-						String.format("Видео %s не существует", videoId)
-				));
+				new VideoNotFoundException(videoId)
+		);
 		// Находим коммент по id, иначе ошибка
 		Comment comment = video.getComments().stream().filter(it -> it.getId().equals(commentId))
 				.findFirst().orElseThrow(() ->
-						new IllegalArgumentException(
-								String.format("Коммент %s не существует", commentId)
-						));
+						new CommentNotFoundException(commentId)
+				);
 		// Строка для вывода результата
 		StringBuilder result = new StringBuilder();
 
