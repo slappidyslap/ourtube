@@ -1,6 +1,7 @@
 package io.melakuera.ourtube.controller;
 
 import io.melakuera.ourtube.dto.CommentReqDto;
+import io.melakuera.ourtube.dto.EditVideoReqDto;
 import io.melakuera.ourtube.dto.UploadVideoReqDto;
 import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
@@ -39,7 +40,11 @@ public class VideoController {
 		return String.format("Видео %s удалено", videoId);
 	}
 
-	// patch
+	@PatchMapping("/{videoId}")
+	Video editVideo(@PathVariable long videoId, EditVideoReqDto dto) {
+
+		return videoService.editVideo(videoId, dto);
+	}
 
 	@GetMapping
 	List<Video> getVideos(
@@ -69,6 +74,15 @@ public class VideoController {
 		user.setUsername("Aktan");
 
 		return videoService.addComment(videoId, dto, user);
+	}
+
+	@PatchMapping("/{videoId}/comments/{commentId}")
+	Comment editComment(
+			@PathVariable long videoId,
+			@PathVariable long commentId,
+			CommentReqDto dto) {
+
+		return videoService.editComment(videoId, commentId, dto);
 	}
 
 	@DeleteMapping("/{videoId}/comments/{commentId}")

@@ -11,7 +11,6 @@ async function getData() {
     }
 }
 
-
 const div = document.querySelector(".video-list_item")
 div.addEventListener("mouseover", (e) => {
     if (e.target.closest('img')) {
@@ -36,3 +35,11 @@ div.addEventListener("mouseout", (e) => {
         div.replaceChild(img, e.target)
     }
 });
+
+const fileInput = document.querySelector('#f')
+fileInput.addEventListener('change', (e) => {
+    const file = fileInput.files[0]
+    console.log(file)
+    const fileUrl = URL.createObjectURL(file)
+    console.log(fileUrl)
+})

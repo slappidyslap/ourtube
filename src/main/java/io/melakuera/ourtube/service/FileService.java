@@ -34,4 +34,19 @@ public class FileService {
 		}
 		return thumbnail.getOriginalFilename();
 	}
+
+	public String editThumbnail(
+			String originalThumbnailName, MultipartFile thumbnail) {
+		boolean result = new File(
+				pathToVideo+"/thumbnail/"+originalThumbnailName).delete();
+		if (!result)
+			throw new IllegalArgumentException("Ошибка! Файла не существует!");
+		try {
+			thumbnail.transferTo(new File(
+					pathToVideo+"/thumbnail/"+thumbnail.getOriginalFilename()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return thumbnail.getOriginalFilename();
+	}
 }

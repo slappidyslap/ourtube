@@ -1,6 +1,7 @@
 package io.melakuera.ourtube.service;
 
 import io.melakuera.ourtube.dto.CommentReqDto;
+import io.melakuera.ourtube.dto.EditVideoReqDto;
 import io.melakuera.ourtube.dto.UploadVideoReqDto;
 import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
@@ -64,6 +65,29 @@ public class VideoService {
 		}
 	}
 
+	public Video editVideo(long videoId, EditVideoReqDto dto) {
+		// Находим видео по id, иначе ошибка
+		Video video = videoRepo.findById(videoId).orElseThrow(() ->
+				new IllegalArgumentException(
+						String.format("Видео %s не существует", videoId)
+				));
+		// Заменяем обложку этого видоса
+		String thumbnailName = fileService.editThumbnail(
+				video.getThumbnailName(), dto.getThumbnail());
+
+		// Заполняем новыми данными
+		video.setTitle(dto.getTitle());
+		video.setDescription(dto.getDescription());
+		video.setTags(dto.getTags());
+		video.setVideoStatus(VideoStatus.valueOf(dto.getVideoStatus()));
+		video.setThumbnailName(thumbnailName);
+
+		// Сохраняем видео
+		videoRepo.save(video);
+
+		return video;
+	}
+
 	public List<Video> findAll() {
 		// Получаем всех видосов
 		return videoRepo.findAll();
@@ -81,7 +105,7 @@ public class VideoService {
 
 	public Comment addComment(Long videoId, CommentReqDto dto, User user) {
 
-		// Получаем видое по id
+		// Получаем видeo по id
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
 				new IllegalArgumentException(
 						String.format("Видео %s не существует", videoId)
@@ -92,7 +116,7 @@ public class VideoService {
 		comment.setUser(user);
 		comment.setVideo(video);
 
-		// Добавляем этому соответствующему видосу коммент тот что сверху
+		// Добавляем этому соответствующему видосу коммент
 		video.getComments().add(comment);
 
 		// Сохраненяем коммент и юзера в бд
@@ -120,6 +144,26 @@ public class VideoService {
 
 		// Если нашлось, то удаляем этот коммент
 		commentRepo.deleteById(commentId);
+	}
+
+	public Comment editComment(
+			long videoId, long commentId, CommentReqDto dto) {
+		// Находим видео по id, иначе ошибка
+		Video video = videoRepo.findById(videoId).orElseThrow(() ->
+				new IllegalArgumentException(
+						String.format("Видео %s не существует", videoId)
+				));
+		// Находим коммент по id, иначе ошибка
+		Comment comment = video.getComments().stream().filter(it ->
+				it.getId().equals(commentId)).findFirst().orElseThrow(() ->
+				new IllegalArgumentException(
+						String.format("Коммент %s не существует", commentId)
+				));
+		// Изменяем текущий коммент на основе dto
+		comment.setContent(dto.getContent());
+
+		// Сохраняем коммент
+		return commentRepo.save(comment);
 	}
 
 	public List<Comment> findAllVideoCommentsByVideoId(Long videoId) {
