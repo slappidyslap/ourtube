@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+Баланча Баланчиев Баланчивич
+<div></div>
+<script>
+    const div = document.querySelector("div")
+    fetch("http://localhost:8080/api/videos").then(res => res.json()).then(json => {
+        console.log(json)
+        div.insertAdjacentText("beforeend", json)}
+    )
+</script>
+</body>
+</html>

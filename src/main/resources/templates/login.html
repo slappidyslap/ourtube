@@ -6,9 +6,9 @@
 </head>
 <body>
 
-<form action="/login" method="post">
+<form action="/api/users/login" method="post">
     <label> username
-        <input type="text" name="username">
+        <input type="text" name="login">
     </label>
     <label> password
         <input type="password" name="password">
@@ -16,5 +16,26 @@
     <button type="submit">Login!</button>
 </form>
 
+<script>
+    const mainForm = document.querySelector("form")
+    mainForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const form = e.currentTarget
+        const formData = new FormData(form)
+        const objectFormData = Object.fromEntries(formData.entries())
+        const jsonStringObject = JSON.stringify(objectFormData)
+
+        const fetchOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: jsonStringObject
+        }
+
+        fetch("http://localhost:8080/api/users/login", fetchOptions)
+            .then(res => res.json()).then(json => console.log(json))
+    })
+</script>
 </body>
 </html>

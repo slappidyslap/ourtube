@@ -1,48 +1,49 @@
 package io.melakuera.ourtube.config;
 
-import io.melakuera.ourtube.service.UserService;
+import io.melakuera.ourtube.security.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private final UserService userService;
+	private final JwtFilter jwtFilter;
 
-	public WebSecurityConfig(@Lazy UserService userService) {
-		this.userService = userService;
-	}
-
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
+	public WebSecurityConfig(JwtFilter jwtFilter) {
+		this.jwtFilter = jwtFilter;
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
+				.cors()
+				.and()
 				.csrf().disable()
 				.authorizeRequests()
 				.antMatchers("/", "/register").permitAll()
-				.antMatchers("/api/users").permitAll()
+				.antMatchers("/api/**").permitAll()
 				.anyRequest().authenticated()
 				.and()
 				.formLogin().loginPage("/login").permitAll()
-				.and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.and().addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(12);
+	}
+
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
 	}
 }
 
