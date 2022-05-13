@@ -23,7 +23,6 @@ import java.util.List;
 @Slf4j
 public class VideoService {
 
-	private final UserService userService;
 	private final FileService fileService;
 	private final VideoRepo videoRepo;
 	private final UserRepo userRepo;

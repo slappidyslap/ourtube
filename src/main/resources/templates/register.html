@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+</head>
+<body>
+
+<form action="/api/users" method="post">
+    <label> username
+        <input type="text" name="username">
+    </label>
+    <label> email
+        <input type="text" name="email">
+    </label>
+    <label> password
+        <input type="password" name="password">
+    </label>
+    <button type="submit">Do It!</button>
+</form>
+
+<script>
+    const mainForm = document.querySelector("form")
+    mainForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const form = e.currentTarget
+        const formData = new FormData(form)
+        const objectFormData = Object.fromEntries(formData.entries())
+        const jsonStringObject = JSON.stringify(objectFormData)
+
+        const fetchOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: jsonStringObject
+        }
+
+        fetch("http://localhost:8080/api/users", fetchOptions)
+            .then(res => res.json()).then(json => console.log(json))
+    })
+</script>
+</body>
+</html>

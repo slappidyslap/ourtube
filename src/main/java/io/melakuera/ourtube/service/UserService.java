@@ -1,63 +1,63 @@
 package io.melakuera.ourtube.service;
 
+import io.melakuera.ourtube.dto.UserRegisterReqDto;
+import io.melakuera.ourtube.entity.Role;
 import io.melakuera.ourtube.entity.User;
-import io.melakuera.ourtube.entity.Video;
 import io.melakuera.ourtube.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserService {
+public class UserService implements UserDetailsService {
 
 	private final UserRepo userRepo;
+	private final BCryptPasswordEncoder passwordEncoder;
 
-//	public boolean isLikedVideo(Long videoId, User user) {
-//		return user.getLikedVideos().stream().anyMatch(it ->
-//				it.getId().equals(videoId));
-//	}
-//
-//	public boolean isDislikedVideo(Long videoId, User user) {
-//		return user.getDislikedVideos().stream().anyMatch(it ->
-//				it.getId().equals(videoId));
-//	}
+	@Override
+	public UserDetails loadUserByUsername(String loginFromForm) throws UsernameNotFoundException {
+		// Если строка из формы валидна формату email
+		if (loginFromForm.matches("\\w+@[a-z]+\\.[a-z]+")) {
+			return userRepo.findByEmail(loginFromForm)
+					.orElseThrow(() -> new UsernameNotFoundException(
+							String.format("Пользователь с данной " +
+									"%s эл. почтой не найден", loginFromForm)));
+		} else {
+			return userRepo.findByUsername(loginFromForm)
+					.orElseThrow(() -> new UsernameNotFoundException(
+							String.format("Пользователь с данной " +
+									"%s имя пользователя не найден", loginFromForm)));
+		}
+	}
 
-//	public void removeVideosLike(Long videoId, User user) {
-//		user.getLikedVideos().removeIf(it -> it.getId().equals(videoId));
-//
-//		userRepo.save(user);
-//		System.out.println("22222222222222222=================================================");
-//
-//		User user2 = userRepo.findById(2L).orElse(null);
-//		System.out.println(user2);
-//		assert user2 != null;
-//		System.out.println(user2.getLikedVideos());
-//	}
+	public ResponseEntity<User> registerNewUser(UserRegisterReqDto dto) {
 
-//	public void removeVideosDislike(Long videoId, User user) {
-//		user.getDislikedVideos().removeIf(it -> it.getId().equals(videoId));
-//
-//		userRepo.save(user);
-//	}
+		if (userRepo.findByEmail(dto.getEmail()).isPresent() ||
+				userRepo.findByUsername(dto.getUsername()).isPresent()) {
+			throw new IllegalArgumentException("Такой юзер уже существует");
+		}
+		User registeredUser = new User();
+		registeredUser.setUsername(dto.getUsername());
+		registeredUser.setEmail(dto.getEmail());
+		registeredUser.setRole(Role.USER);
+		registeredUser.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-//	public void likeToVideo(Video video, User user) {
-//		user.getLikedVideos().add(video);
-//
-//		userRepo.save(user);
-//		System.out.println("1111111111111=================================================");
-//
-//		User user2 = userRepo.findById(2L).orElse(null);
-//		System.out.println(user2);
-//		assert user2 != null;
-//		System.out.println(user2.getLikedVideos());
-//	}
+		userRepo.save(registeredUser);
 
-//	public void disLikeToVideo(Video video, User user) {
-//		user.getDislikedVideos().add(video);
-//
-//		userRepo.save(user);
-//	}
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Location", "http://localhost:8080/");
+
+		return new ResponseEntity<>(registeredUser, headers, HttpStatus.CREATED);
+	}
 }
 

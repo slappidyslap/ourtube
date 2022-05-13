@@ -1,9 +1,7 @@
 package io.melakuera.ourtube.exception;
 
 import io.melakuera.ourtube.dto.ExceptionHandlerResDto;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,6 +20,7 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 	})
 	public ResponseEntity<ExceptionHandlerResDto> handleNotFound(
 			HttpServletRequest req, Exception ex) {
+
 		ExceptionHandlerResDto dto = new ExceptionHandlerResDto();
 		dto.setTimestamp(LocalDateTime.now().format(
 				DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")));

@@ -1,15 +1,18 @@
 package io.melakuera.ourtube.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Getter
@@ -17,38 +20,40 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @Table(name = "usr")
-public class User {
+public class User implements UserDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
 	private Long id;
 	private String username;
 	private String email;
-	@ManyToMany
+	private String password;
+	@Enumerated(EnumType.STRING)
+	private Role role;
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "subscriber_subscription",
 			joinColumns = @JoinColumn(name = "subscriber_id"),
 			inverseJoinColumns = @JoinColumn(name = "subscription_id"))
 	@ToString.Exclude
 	private List<User> subscriptions;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "subscriber_subscription",
 			joinColumns = @JoinColumn(name = "subscription_id"),
 			inverseJoinColumns = @JoinColumn(name = "subscriber_id"))
 	@ToString.Exclude
 	private List<User> subscribers;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Video> likedVideos = new ArrayList<>();
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Video> dislikedVideos = new ArrayList<>();
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Video> viewedVideos;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Comment> likedComments = new ArrayList<>();
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Comment> dislikedComments = new ArrayList<>();
 
@@ -102,6 +107,46 @@ public class User {
 
 	public void dislikeComment(Comment comment) {
 		dislikedComments.add(comment);
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Collections.singletonList(
+				new SimpleGrantedAuthority(role.name()));
+	}
+
+	@Override
+	public String getUsername() {
+		return username;
+	}
+
+	@Override
+	public String getPassword() {
+		return password;
+	}
+
+	@JsonIgnore
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@JsonIgnore
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@JsonIgnore
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@JsonIgnore
+	@Override
+	public boolean isEnabled() {
+		return true;
 	}
 
 	@Override
