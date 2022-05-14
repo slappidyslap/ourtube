@@ -35,7 +35,7 @@ public class UserService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
 
-		return extractLoginForm(login);
+		return extractUserByLoginForm(login);
 	}
 
 	public ResponseEntity<User> registerNewUser(UserRegisterReqDto dto) {
@@ -68,7 +68,7 @@ public class UserService implements UserDetailsService {
 		);
 
 		String jwt = jwtService.generateJwt(dto.getLogin());
-		User user = extractLoginForm(dto.getLogin());
+		User user = extractUserByLoginForm(dto.getLogin());
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("jwt", jwt);
@@ -77,7 +77,7 @@ public class UserService implements UserDetailsService {
 		return ResponseEntity.ok(body);
 	}
 
-	public User extractLoginForm(String login) {
+	public User extractUserByLoginForm(String login) {
 		// Если строка из формы валидна формату email
 		if (login.matches("\\w+@[a-z]+\\.[a-z]+")) {
 			return userRepo.findByEmail(login)

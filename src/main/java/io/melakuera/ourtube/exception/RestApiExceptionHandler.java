@@ -1,6 +1,5 @@
 package io.melakuera.ourtube.exception;
 
-import io.melakuera.ourtube.dto.ExceptionHandlerResDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,6 +9,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
@@ -18,17 +19,16 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 			VideoNotFoundException.class,
 			CommentNotFoundException.class
 	})
-	public ResponseEntity<ExceptionHandlerResDto> handleNotFound(
-			HttpServletRequest req, Exception ex) {
+	public ResponseEntity<?> handleNotFound(HttpServletRequest req, Exception ex) {
 
-		ExceptionHandlerResDto dto = new ExceptionHandlerResDto();
-		dto.setTimestamp(LocalDateTime.now().format(
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("timestamp", LocalDateTime.now().format(
 				DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")));
-		dto.setStatus(HttpStatus.NOT_FOUND.value());
-		dto.setError(HttpStatus.NOT_FOUND.getReasonPhrase());
-		dto.setMessage(ex.getMessage());
-		dto.setPath(req.getRequestURI());
+		body.put("status", HttpStatus.NOT_FOUND.value());
+		body.put("error", HttpStatus.NOT_FOUND.getReasonPhrase());
+		body.put("message", ex.getMessage());
+		body.put("path", req.getRequestURI());
 
-		return new ResponseEntity<>(dto, HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
 	}
 }

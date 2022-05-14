@@ -16,4 +16,7 @@ spring:
       max-request-size: 124MB
       location: E:/JavaProjects/ourtube/upload/
 
-jwt.secret: super
+jwt:
+  secret: MyUltraMegaGigaTerraPetaSuperPuperDuperRtxGtxRxRadeonGeforceRyzenPentiumCeleroneXeonSecretJsonWebToken
+  durationSec: 15
+
