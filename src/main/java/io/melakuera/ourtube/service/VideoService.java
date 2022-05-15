@@ -8,6 +8,7 @@ import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
 import io.melakuera.ourtube.entity.VideoStatus;
 import io.melakuera.ourtube.exception.CommentNotFoundException;
+import io.melakuera.ourtube.exception.OurtubeException;
 import io.melakuera.ourtube.exception.VideoNotFoundException;
 import io.melakuera.ourtube.repo.CommentRepo;
 import io.melakuera.ourtube.repo.UserRepo;
@@ -52,39 +53,45 @@ public class VideoService {
 		return video;
 	}
 
-	public void deleteById(Long videoId) {
-		// Удаляем по videoId если таковое видео существует
-		if (videoRepo.findById(videoId).isPresent()) {
-			videoRepo.deleteById(videoId);
-
-			log.info("Видео {} удалено", videoId);
-		}
-		// Иначе ошибка
-		else {
-			throw new VideoNotFoundException(videoId);
-		}
-	}
-
-	public Video editVideo(long videoId, EditVideoReqDto dto) {
+	public void deleteById(Long videoId, User authUser) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
 				new VideoNotFoundException(videoId)
 		);
-		// Заменяем обложку этого видоса
-		String thumbnailName = fileService.editThumbnail(
-				video.getThumbnailName(), dto.getThumbnail());
+		// Проверяем является ли авторизованный юзер автором этого видео
+		if (video.getUser().equals(authUser)) {
+			videoRepo.deleteById(videoId);
+			log.info("Видео {} удалено", videoId);
+			// Иначе он не явл. автором, посему ошибка
+		} else {
+			throw new OurtubeException("Только автор видео может удалять свои видео");
+		}
+	}
 
-		// Заполняем новыми данными
-		video.setTitle(dto.getTitle());
-		video.setDescription(dto.getDescription());
-		video.setTags(dto.getTags());
-		video.setVideoStatus(VideoStatus.valueOf(dto.getVideoStatus()));
-		video.setThumbnailName(thumbnailName);
+	public Video editVideo(long videoId, EditVideoReqDto dto, User authUser) {
+		// Находим видео по id, иначе ошибка
+		Video video = videoRepo.findById(videoId).orElseThrow(() ->
+				new VideoNotFoundException(videoId)
+		);
+		// Проверяем является ли авторизованный юзер автором этого видео
+		if (video.getUser().equals(authUser)) {
+			// Заменяем обложку этого видоса
+			String thumbnailName = fileService.editThumbnail(
+					video.getThumbnailName(), dto.getThumbnail());
 
+			// Заполняем новыми данными
+			video.setTitle(dto.getTitle());
+			video.setDescription(dto.getDescription());
+			video.setTags(dto.getTags());
+			video.setVideoStatus(VideoStatus.valueOf(dto.getVideoStatus()));
+			video.setThumbnailName(thumbnailName);
+
+			// Иначе он не явл. автором, посему ошибка
+		} else {
+			throw new OurtubeException("Только автор видео может редактировать свои видео");
+		}
 		// Сохраняем видео
-		videoRepo.save(video);
-
-		return video;
+		return videoRepo.save(video);
 	}
 
 	public List<Video> findAll() {
@@ -126,24 +133,30 @@ public class VideoService {
 		return comment;
 	}
 
-	public void deleteCommentById(Long videoId, Long commentId) {
+	public void deleteCommentById(Long videoId, Long commentId, User authUser) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
 				new VideoNotFoundException(videoId)
 		);
 
 		// Находим у это видоса коммент по id, иначе ошибка
-		video.getComments().stream().filter(it ->
+		Comment comment = video.getComments().stream().filter(it ->
 				it.getId().equals(commentId)).findFirst().orElseThrow(() ->
 				new CommentNotFoundException(commentId)
 		);
+		// Проверяем является ли авторизованный юзер автором этого коммента
+		if (comment.getUser().equals(authUser)) {
+			// Если да, то удаляем этот коммент
+			commentRepo.deleteById(commentId);
+			// Иначе он не явл. автором, посему ошибка
+		} else
+			throw new OurtubeException("Только автор коммента может удалять свои комменты");
 
-		// Если нашлось, то удаляем этот коммент
-		commentRepo.deleteById(commentId);
+
 	}
 
 	public Comment editComment(
-			long videoId, long commentId, CommentReqDto dto) {
+			long videoId, long commentId, CommentReqDto dto, User authUser) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
 				new VideoNotFoundException(videoId)
@@ -153,8 +166,13 @@ public class VideoService {
 				it.getId().equals(commentId)).findFirst().orElseThrow(() ->
 				new CommentNotFoundException(commentId)
 		);
-		// Изменяем текущий коммент на основе dto
-		comment.setContent(dto.getContent());
+		// Проверяем является ли авторизованный юзер автором этого коммента
+		if (comment.getUser().equals(authUser)) {
+			// Изменяем текущий коммент на основе dto
+			comment.setContent(dto.getContent());
+			// Иначе он не явл. автором, посему ошибка
+		} else
+			throw new OurtubeException("Только автор коммента может редактировать свои комменты");
 
 		// Сохраняем коммент
 		return commentRepo.save(comment);

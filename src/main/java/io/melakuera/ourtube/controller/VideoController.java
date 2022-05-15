@@ -32,16 +32,19 @@ public class VideoController {
 	}
 
 	@DeleteMapping("/{videoId}")
-	String deleteVideo(@PathVariable long videoId) {
-		videoService.deleteById(videoId);
+	String deleteVideo(@PathVariable long videoId, @AuthenticationPrincipal User authUser) {
+		videoService.deleteById(videoId, authUser);
 
 		return String.format("Видео %s удалено", videoId);
 	}
 
 	@PatchMapping("/{videoId}")
-	Video editVideo(@PathVariable long videoId, @RequestBody EditVideoReqDto dto) {
+	Video editVideo(
+			@PathVariable long videoId,
+			EditVideoReqDto dto,
+			@AuthenticationPrincipal User authUser) {
 
-		return videoService.editVideo(videoId, dto);
+		return videoService.editVideo(videoId, dto, authUser);
 	}
 
 	@GetMapping
@@ -66,28 +69,28 @@ public class VideoController {
 	@ResponseStatus(HttpStatus.CREATED)
 	Comment commentVideo(
 			@PathVariable long videoId,
-			@RequestBody CommentReqDto dto) {
-		// Mock User, для тестинга
-		User user = new User();
-		user.setUsername("Aktan");
+			@RequestBody CommentReqDto dto,
+			@AuthenticationPrincipal User authUser) {
 
-		return videoService.addComment(videoId, dto, user);
+		return videoService.addComment(videoId, dto, authUser);
 	}
 
 	@PatchMapping("/{videoId}/comments/{commentId}")
 	Comment editComment(
 			@PathVariable long videoId,
 			@PathVariable long commentId,
-			@RequestBody CommentReqDto dto) {
+			@RequestBody CommentReqDto dto,
+			@AuthenticationPrincipal User authUser) {
 
-		return videoService.editComment(videoId, commentId, dto);
+		return videoService.editComment(videoId, commentId, dto, authUser);
 	}
 
 	@DeleteMapping("/{videoId}/comments/{commentId}")
 	String deleteComment(
 			@PathVariable long videoId,
-			@PathVariable long commentId) {
-		videoService.deleteCommentById(videoId, commentId);
+			@PathVariable long commentId,
+			@AuthenticationPrincipal User authUser) {
+		videoService.deleteCommentById(videoId, commentId, authUser);
 
 		return String.format("Коммент %s удален", videoId);
 	}
@@ -99,45 +102,31 @@ public class VideoController {
 
 	//=====================================================
 
-	// Mock User, для тестинга
-	// Тут надо, потому что нужен один и тот же юзер
-	User user1 = new User();
-	{
-		user1.setUsername("Dastan");
-
-	}
-
 	@PostMapping("/{videoId}/like")
-	String likeVideo(@PathVariable long videoId) {
-		return videoService.likeVideo(videoId, user1);
+	String likeVideo(@PathVariable long videoId, @AuthenticationPrincipal User authUser) {
+		return videoService.likeVideo(videoId, authUser);
 	}
 
 	@PostMapping("/{videoId}/dislike")
-	String dislikeVideo(@PathVariable long videoId) {
-		return videoService.dislikeVideo(videoId, user1);
+	String dislikeVideo(@PathVariable long videoId, @AuthenticationPrincipal User authUser) {
+		return videoService.dislikeVideo(videoId, authUser);
 	}
 
 	//=====================================================
 
-	// Mock User, для тестинга
-	// Тут надо, потому что нужен один и тот же юзер
-	User user2 = new User();
-	{
-		user2.setUsername("Salman");
-
-	}
-
 	@PostMapping("/{videoId}/comments/{commentId}/like")
 	String likeComment(
 			@PathVariable long videoId,
-			@PathVariable long commentId) {
-		return videoService.likeComment(videoId, commentId, user2);
+			@PathVariable long commentId,
+			@AuthenticationPrincipal User authUser) {
+		return videoService.likeComment(videoId, commentId, authUser);
 	}
 
 	@PostMapping("/{videoId}/comments/{commentId}/dislike")
 	String dislikeComment(
 			@PathVariable long videoId,
-			@PathVariable long commentId) {
-		return videoService.dislikeComment(videoId, commentId, user2);
+			@PathVariable long commentId,
+			@AuthenticationPrincipal User authUser) {
+		return videoService.dislikeComment(videoId, commentId, authUser);
 	}
 }

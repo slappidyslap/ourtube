@@ -32,7 +32,10 @@ public class RestApiExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
 	}
 
-	@ExceptionHandler(UserAlreadyExistsException.class)
+	@ExceptionHandler(value = {
+			UserAlreadyExistsException.class,
+			OurtubeException.class
+	})
 	public ResponseEntity<?> handleUserExists(HttpServletRequest req, Exception ex) {
 
 		Map<String, Object> body = new LinkedHashMap<>();
