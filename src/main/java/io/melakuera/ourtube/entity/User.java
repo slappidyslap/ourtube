@@ -1,13 +1,11 @@
 package io.melakuera.ourtube.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -65,58 +63,6 @@ public class User implements UserDetails {
 	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Comment> dislikedComments = new ArrayList<>();
-
-	public boolean isLikedVideo(long videoId) {
-		return likedVideos.stream().anyMatch(it ->
-				it.getId().equals(videoId));
-	}
-
-	public boolean isDislikedVideo(long videoId) {
-		return dislikedVideos.stream().anyMatch(it ->
-				it.getId().equals(videoId));
-	}
-
-	public void removeVideosDislike(long videoId) {
-		dislikedVideos.removeIf(it -> it.getId().equals(videoId));
-	}
-
-	public void removeVideosLike(long videoId) {
-		likedVideos.removeIf(it -> it.getId().equals(videoId));
-	}
-
-	public void likeVideo(Video video) {
-		likedVideos.add(video);
-	}
-
-	public void dislikeVideo(Video video) {
-		dislikedVideos.add(video);
-	}
-
-	public boolean isLikedComment(long commentId) {
-		return likedComments.stream().anyMatch(it ->
-				it.getId().equals(commentId));
-	}
-
-	public boolean isDislikedComment(long commentId) {
-		return dislikedComments.stream().anyMatch(it ->
-				it.getId().equals(commentId));
-	}
-
-	public void removeCommentsDislike(long commentId) {
-		dislikedComments.removeIf(it -> it.getId().equals(commentId));
-	}
-
-	public void removeCommentsLike(long commentId) {
-		likedComments.removeIf(it -> it.getId().equals(commentId));
-	}
-
-	public void likeComment(Comment comment) {
-		likedComments.add(comment);
-	}
-
-	public void dislikeComment(Comment comment) {
-		dislikedComments.add(comment);
-	}
 
 	@JsonIgnore
 	@Override

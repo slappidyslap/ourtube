@@ -2,8 +2,10 @@ package io.melakuera.ourtube.service;
 
 import io.melakuera.ourtube.dto.AuthenticationReqDto;
 import io.melakuera.ourtube.dto.UserRegisterReqDto;
+import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.Role;
 import io.melakuera.ourtube.entity.User;
+import io.melakuera.ourtube.entity.Video;
 import io.melakuera.ourtube.exception.UserAlreadyExistsException;
 import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.security.JwtService;
@@ -19,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +29,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Slf4j
 public class UserService implements UserDetailsService {
 
@@ -40,6 +44,7 @@ public class UserService implements UserDetailsService {
 		return extractUserByLoginForm(login);
 	}
 
+	@Transactional(readOnly = false)
 	public ResponseEntity<User> registerNewUser(UserRegisterReqDto dto) {
 
 		if (userRepo.findByEmail(dto.getEmail()).isPresent() ||
@@ -63,6 +68,7 @@ public class UserService implements UserDetailsService {
 		return new ResponseEntity<>(registeredUser, headers, HttpStatus.CREATED);
 	}
 
+	@Transactional(readOnly = false)
 	public ResponseEntity<?> authUser(AuthenticationReqDto dto) {
 
 		authenticationManager.authenticate(
@@ -99,6 +105,74 @@ public class UserService implements UserDetailsService {
 
 	public List<User> findAll() {
 		return userRepo.findAll();
+	}
+
+	public boolean isLikedComment(long commentId, long userId) {
+		List<Comment> comments = userRepo.findUserByIdFetchLikedComments(userId)
+				.getLikedComments();
+
+		return comments.stream().anyMatch(it -> it.getId().equals(commentId));
+	}
+
+	public boolean isDislikedComment(long commentId, long userId) {
+		List<Comment> comments = userRepo.findUserByIdFetchDislikedComments(userId)
+				.getDislikedComments();
+
+		return comments.stream().anyMatch(it -> it.getId().equals(commentId));
+	}
+
+	public void likeComment(Comment comment, long userId) {
+		userRepo.findUserByIdFetchLikedComments(userId)
+				.getLikedComments().add(comment);
+	}
+
+	public void dislikeComment(Comment comment, long userId) {
+		userRepo.findUserByIdFetchDislikedComments(userId)
+				.getDislikedComments().add(comment);
+	}
+
+	public void removeCommentsLike(long commentId, long userId) {
+		userRepo.findUserByIdFetchLikedComments(userId)
+				.getLikedComments().removeIf(it -> it.getId().equals(commentId));
+	}
+
+	public void removeCommentsDislike(long commentId, long userId) {
+		userRepo.findUserByIdFetchDislikedComments(userId)
+				.getDislikedComments().removeIf(it -> it.getId().equals(commentId));
+	}
+
+	public boolean isLikedVideo(long commentId, long userId) {
+		List<Video> videos = userRepo.findUserByIdFetchLikedVideos(userId)
+				.getLikedVideos();
+
+		return videos.stream().anyMatch(it -> it.getId().equals(commentId));
+	}
+
+	public boolean isDislikedVideo(long commentId, long userId) {
+		List<Video> videos = userRepo.findUserByIdFetchDislikedVideos(userId)
+				.getDislikedVideos();
+
+		return videos.stream().anyMatch(it -> it.getId().equals(commentId));
+	}
+
+	public void likeVideo(Video video, long userId) {
+		userRepo.findUserByIdFetchLikedVideos(userId)
+				.getLikedVideos().add(video);
+	}
+
+	public void dislikeVideo(Video video, long userId) {
+		userRepo.findUserByIdFetchDislikedVideos(userId)
+				.getDislikedVideos().add(video);
+	}
+
+	public void removeVideosLike(long commentId, long userId) {
+		userRepo.findUserByIdFetchLikedVideos(userId)
+				.getLikedVideos().removeIf(it -> it.getId().equals(commentId));
+	}
+
+	public void removeVideosDislike(long commentId, long userId) {
+		userRepo.findUserByIdFetchDislikedVideos(userId)
+				.getDislikedVideos().removeIf(it -> it.getId().equals(commentId));
 	}
 }
 

@@ -6,6 +6,7 @@ import io.melakuera.ourtube.dto.UploadVideoReqDto;
 import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
+import io.melakuera.ourtube.service.UserService;
 import io.melakuera.ourtube.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

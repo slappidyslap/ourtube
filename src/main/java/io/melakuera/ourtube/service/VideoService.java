@@ -16,19 +16,23 @@ import io.melakuera.ourtube.repo.VideoRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class VideoService {
 
 	private final FileService fileService;
+	private final UserService userService;
 	private final VideoRepo videoRepo;
 	private final UserRepo userRepo;
 	private final CommentRepo commentRepo;
 
+	@Transactional(readOnly = false)
 	public Video newVideo(UploadVideoReqDto dto, User user) {
 		// Загружаем видео и превью в хранилище
 		String videoName = fileService.uploadVideo(dto.getVideo());
@@ -53,6 +57,7 @@ public class VideoService {
 		return video;
 	}
 
+	@Transactional(readOnly = false)
 	public void deleteById(Long videoId, User authUser) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
@@ -68,6 +73,7 @@ public class VideoService {
 		}
 	}
 
+	@Transactional(readOnly = false)
 	public Video editVideo(long videoId, EditVideoReqDto dto, User authUser) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
@@ -108,6 +114,7 @@ public class VideoService {
 
 	//====================================
 
+	@Transactional(readOnly = false)
 	public Comment addComment(Long videoId, CommentReqDto dto, User user) {
 
 		// Получаем видeo по id
@@ -133,6 +140,7 @@ public class VideoService {
 		return comment;
 	}
 
+	@Transactional(readOnly = false)
 	public void deleteCommentById(Long videoId, Long commentId, User authUser) {
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
@@ -155,6 +163,7 @@ public class VideoService {
 
 	}
 
+	@Transactional(readOnly = false)
 	public Comment editComment(
 			long videoId, long commentId, CommentReqDto dto, User authUser) {
 		// Находим видео по id, иначе ошибка
@@ -189,9 +198,8 @@ public class VideoService {
 
 	//====================================
 
+	@Transactional(readOnly = false)
 	public String likeVideo(Long videoId, User user) {
-		// Пока что так
-		userRepo.save(user);
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
@@ -205,12 +213,12 @@ public class VideoService {
 		long dislikesCount = video.getDislikesCount();
 
 		// Если в это видео авторизованный юзер не ставил лайк
-		if (!user.isLikedVideo(videoId)) {
+		if (!userService.isLikedVideo(videoId, user.getId())) {
 
 			// И если авторизованный юзер уже ставил дизлайк
-			if (user.isDislikedVideo(videoId)) {
+			if (userService.isDislikedVideo(videoId, user.getId())) {
 				// То убираем дизлайк у видео
-				user.removeVideosDislike(videoId);
+				userService.removeVideosDislike(videoId, user.getId());
 
 				// И декрементируем кол-во дизлайков у видео
 				video.setDislikesCount(--dislikesCount);
@@ -218,7 +226,7 @@ public class VideoService {
 				result.append(String.format("Дизлайк к видео %s убран\n", videoId));
 			}
 			// И тогда ставим лайк
-			user.likeVideo(video);
+			userService.likeVideo(video, user.getId());
 
 			// И инкрементируем кол-во лайков у видео
 			video.setLikesCount(++likesCount);
@@ -228,7 +236,7 @@ public class VideoService {
 
 		} else {
 			// Иначе юзер ставил лайк, тогда убираем лайк у видео
-			user.removeVideosLike(videoId);
+			userService.removeVideosLike(videoId, user.getId());
 
 			// И декрементируем кол-во лайков у видео
 			video.setLikesCount(--likesCount);
@@ -243,10 +251,8 @@ public class VideoService {
 		return result.toString();
 	}
 
+	@Transactional(readOnly = false)
 	public String dislikeVideo(Long videoId, User user) {
-
-		// Пока что так
-		userRepo.save(user);
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
@@ -260,12 +266,12 @@ public class VideoService {
 		long likesCount = video.getLikesCount();
 
 		// Если в это видео авторизованный юзер не ставил дизлайк
-		if (!user.isDislikedVideo(videoId)) {
+		if (!userService.isDislikedVideo(videoId, user.getId())) {
 
 			// И если авторизованный юзер уже ставил лайк
-			if (user.isLikedVideo(videoId)) {
+			if (userService.isLikedVideo(videoId, user.getId())) {
 				// То убираем лайк у видео
-				user.removeVideosLike(videoId);
+				userService.removeVideosLike(videoId, user.getId());
 
 				// И декрементируем кол-во лайков у видео
 				video.setLikesCount(--likesCount);
@@ -273,7 +279,7 @@ public class VideoService {
 				result.append(String.format("Лайк к видео %s убран\n", videoId));
 			}
 			// И тогда ставим дизлайк
-			user.dislikeVideo(video);
+			userService.dislikeVideo(video, user.getId());
 
 			// И инкрементируем кол-во дизлайков у видео
 			video.setDislikesCount(++dislikesCount);
@@ -283,7 +289,7 @@ public class VideoService {
 
 		} else {
 			// Иначе юзер ставил дизлайк, тогда убираем дизлайк у видео
-			user.removeVideosDislike(videoId);
+			userService.removeVideosDislike(videoId, user.getId());
 
 			// И декрементируем кол-во дизлайков у видео
 			video.setDislikesCount(--dislikesCount);
@@ -299,9 +305,8 @@ public class VideoService {
 		return result.toString();
 	}
 
+	@Transactional(readOnly = false)
 	public String likeComment(long videoId, long commentId, User user) {
-		// Пока что так
-		userRepo.save(user);
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
@@ -320,21 +325,19 @@ public class VideoService {
 		long dislikesCount = comment.getDislikesCount();
 
 		// Если в этот коммент авторизованный юзер не ставил лайк
-		if (!user.isLikedComment(commentId)) {
+		if (!userService.isLikedComment(commentId, user.getId())) {
 
 			// И если авторизованный юзер уже ставил дизлайк
-			if (user.isDislikedComment(commentId)) {
+			if (userService.isDislikedComment(commentId, user.getId())) {
 				// То убираем дизлайк у коммента
-				user.removeCommentsDislike(commentId);
-
+				userService.removeCommentsDislike(commentId, user.getId());
 				// И декрементируем кол-во дизлайков у коммента
 				comment.setDislikesCount(--dislikesCount);
 
 				result.append(String.format("Дизлайк к комменту %s убран\n", videoId));
 			}
 			// И тогда ставим лайк
-			user.likeComment(comment);
-
+			userService.likeComment(comment, user.getId());
 			// И инкрементируем кол-во лайков у коммента
 			comment.setLikesCount(++likesCount);
 
@@ -343,7 +346,7 @@ public class VideoService {
 
 		} else {
 			// Иначе юзер ставил лайк, тогда убираем лайк у коммента
-			user.removeCommentsLike(commentId);
+			userService.removeCommentsLike(commentId, user.getId());
 
 			// И декрементируем кол-во лайков у коммента
 			comment.setLikesCount(--likesCount);
@@ -359,9 +362,8 @@ public class VideoService {
 		return result.toString();
 	}
 
+	@Transactional(readOnly = false)
 	public String dislikeComment(long videoId, long commentId, User user) {
-		// Пока что так
-		userRepo.save(user);
 
 		// Находим видео по id, иначе ошибка
 		Video video = videoRepo.findById(videoId).orElseThrow(() ->
@@ -380,12 +382,12 @@ public class VideoService {
 		long likesCount = comment.getLikesCount();
 
 		// Если в этот коммент авторизованный юзер не ставил дизлайк
-		if (!user.isDislikedComment(commentId)) {
+		if (!userService.isDislikedComment(commentId, user.getId())) {
 
 			// И если авторизованный юзер уже ставил лайк
-			if (user.isLikedComment(commentId)) {
+			if (userService.isLikedComment(commentId, user.getId())) {
 				// То убираем лайк у коммента
-				user.removeCommentsLike(commentId);
+				userService.removeCommentsLike(commentId, user.getId());
 
 				// И декрементируем кол-во лайков у коммента
 				comment.setLikesCount(--likesCount);
@@ -394,7 +396,7 @@ public class VideoService {
 				result.append(String.format("Лайк к комменту %s убран\n", videoId));
 			}
 			// И тогда ставим дизлайк
-			user.dislikeComment(comment);
+			userService.dislikeComment(comment, user.getId());
 
 			// И инкрементируем кол-во дизлайков у коммента
 			comment.setDislikesCount(++dislikesCount);
@@ -404,7 +406,7 @@ public class VideoService {
 
 		} else {
 			// Иначе юзер ставил дизлайк, тогда убираем дизлайк у коммента
-			user.removeCommentsDislike(commentId);
+			userService.removeCommentsDislike(commentId, user.getId());
 
 			// И декрементируем кол-во дизлайков у коммента
 			comment.setDislikesCount(--dislikesCount);
