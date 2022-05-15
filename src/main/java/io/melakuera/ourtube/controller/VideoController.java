@@ -6,11 +6,11 @@ import io.melakuera.ourtube.dto.UploadVideoReqDto;
 import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
-import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,18 +19,16 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/videos")
 @RequiredArgsConstructor
+@Slf4j
 public class VideoController {
 
 	private final VideoService videoService;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	Video newVideo(UploadVideoReqDto dto) {
-		// Mock User, для тестинга
-		User user = new User();
-		user.setUsername("Eld");
+	Video newVideo(UploadVideoReqDto dto, @AuthenticationPrincipal User authUser) {
 
-		return videoService.newVideo(dto, user);
+		return videoService.newVideo(dto, authUser);
 	}
 
 	@DeleteMapping("/{videoId}")
@@ -41,7 +39,7 @@ public class VideoController {
 	}
 
 	@PatchMapping("/{videoId}")
-	Video editVideo(@PathVariable long videoId, EditVideoReqDto dto) {
+	Video editVideo(@PathVariable long videoId, @RequestBody EditVideoReqDto dto) {
 
 		return videoService.editVideo(videoId, dto);
 	}
@@ -68,7 +66,7 @@ public class VideoController {
 	@ResponseStatus(HttpStatus.CREATED)
 	Comment commentVideo(
 			@PathVariable long videoId,
-			CommentReqDto dto) {
+			@RequestBody CommentReqDto dto) {
 		// Mock User, для тестинга
 		User user = new User();
 		user.setUsername("Aktan");
@@ -80,7 +78,7 @@ public class VideoController {
 	Comment editComment(
 			@PathVariable long videoId,
 			@PathVariable long commentId,
-			CommentReqDto dto) {
+			@RequestBody CommentReqDto dto) {
 
 		return videoService.editComment(videoId, commentId, dto);
 	}

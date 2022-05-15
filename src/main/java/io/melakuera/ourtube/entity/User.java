@@ -1,6 +1,7 @@
 package io.melakuera.ourtube.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,33 +27,41 @@ public class User implements UserDetails {
 	private Long id;
 	private String username;
 	private String email;
+	@JsonIgnore
 	private String password;
 	@Enumerated(EnumType.STRING)
 	private Role role;
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "subscriber_subscription",
 			joinColumns = @JoinColumn(name = "subscriber_id"),
 			inverseJoinColumns = @JoinColumn(name = "subscription_id"))
 	@ToString.Exclude
-	private List<User> subscriptions;
+	private List<User> subscriptions = new ArrayList<>();
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "subscriber_subscription",
 			joinColumns = @JoinColumn(name = "subscription_id"),
 			inverseJoinColumns = @JoinColumn(name = "subscriber_id"))
 	@ToString.Exclude
-	private List<User> subscribers;
+	private List<User> subscribers = new ArrayList<>();
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Video> likedVideos = new ArrayList<>();
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Video> dislikedVideos = new ArrayList<>();
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
-	private List<Video> viewedVideos;
+	private List<Video> viewedVideos = new ArrayList<>();
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Comment> likedComments = new ArrayList<>();
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@ToString.Exclude
 	private List<Comment> dislikedComments = new ArrayList<>();
@@ -109,6 +118,7 @@ public class User implements UserDetails {
 		dislikedComments.add(comment);
 	}
 
+	@JsonIgnore
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return Collections.singletonList(

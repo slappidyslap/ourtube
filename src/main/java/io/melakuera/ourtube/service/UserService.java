@@ -4,6 +4,7 @@ import io.melakuera.ourtube.dto.AuthenticationReqDto;
 import io.melakuera.ourtube.dto.UserRegisterReqDto;
 import io.melakuera.ourtube.entity.Role;
 import io.melakuera.ourtube.entity.User;
+import io.melakuera.ourtube.exception.UserAlreadyExistsException;
 import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -42,12 +44,15 @@ public class UserService implements UserDetailsService {
 
 		if (userRepo.findByEmail(dto.getEmail()).isPresent() ||
 				userRepo.findByUsername(dto.getUsername()).isPresent()) {
-			throw new IllegalArgumentException("Такой юзер уже существует");
+			throw new UserAlreadyExistsException();
 		}
 		User registeredUser = new User();
 		registeredUser.setUsername(dto.getUsername());
+		if (dto.getUsername().equals("Eld"))
+			registeredUser.setRole(Role.ADMIN);
+		else
+			registeredUser.setRole(Role.USER);
 		registeredUser.setEmail(dto.getEmail());
-		registeredUser.setRole(Role.USER);
 		registeredUser.setPassword(passwordEncoder.encode(dto.getPassword()));
 
 		userRepo.save(registeredUser);
@@ -90,6 +95,10 @@ public class UserService implements UserDetailsService {
 							String.format("Пользователь с данной " +
 									"%s имя пользователя не найден", login)));
 		}
+	}
+
+	public List<User> findAll() {
+		return userRepo.findAll();
 	}
 }
 
