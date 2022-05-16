@@ -121,21 +121,25 @@ public class UserService implements UserDetailsService {
 		return comments.stream().anyMatch(it -> it.getId().equals(commentId));
 	}
 
+	@Transactional(readOnly = false)
 	public void likeComment(Comment comment, long userId) {
 		userRepo.findUserByIdFetchLikedComments(userId)
 				.getLikedComments().add(comment);
 	}
 
+	@Transactional(readOnly = false)
 	public void dislikeComment(Comment comment, long userId) {
 		userRepo.findUserByIdFetchDislikedComments(userId)
 				.getDislikedComments().add(comment);
 	}
 
+	@Transactional(readOnly = false)
 	public void removeCommentsLike(long commentId, long userId) {
 		userRepo.findUserByIdFetchLikedComments(userId)
 				.getLikedComments().removeIf(it -> it.getId().equals(commentId));
 	}
 
+	@Transactional(readOnly = false)
 	public void removeCommentsDislike(long commentId, long userId) {
 		userRepo.findUserByIdFetchDislikedComments(userId)
 				.getDislikedComments().removeIf(it -> it.getId().equals(commentId));
@@ -155,21 +159,25 @@ public class UserService implements UserDetailsService {
 		return videos.stream().anyMatch(it -> it.getId().equals(commentId));
 	}
 
+	@Transactional(readOnly = false)
 	public void likeVideo(Video video, long userId) {
 		userRepo.findUserByIdFetchLikedVideos(userId)
 				.getLikedVideos().add(video);
 	}
 
+	@Transactional(readOnly = false)
 	public void dislikeVideo(Video video, long userId) {
 		userRepo.findUserByIdFetchDislikedVideos(userId)
 				.getDislikedVideos().add(video);
 	}
 
+	@Transactional(readOnly = false)
 	public void removeVideosLike(long commentId, long userId) {
 		userRepo.findUserByIdFetchLikedVideos(userId)
 				.getLikedVideos().removeIf(it -> it.getId().equals(commentId));
 	}
 
+	@Transactional(readOnly = false)
 	public void removeVideosDislike(long commentId, long userId) {
 		userRepo.findUserByIdFetchDislikedVideos(userId)
 				.getDislikedVideos().removeIf(it -> it.getId().equals(commentId));
