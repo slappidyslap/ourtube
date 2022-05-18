@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/api/videos" enctype="multipart/form-data">
+    <label for="title">Заголовок видео</label>
+    <input type="text" name="title" id="title">
+    <br/>
+    <label for="description">Описание видео</label>
+    <textarea name="description" id="description" cols="30" rows="10"></textarea>
+    <br/>
+    <label for="tags">Теги видео</label>
+    <input type="text" name="tags" id="tags">
+    <br/>
+    <select id="videoStatus">
+        <option value="PUBLIC" selected> Общедоступный</option>
+        <option value="PRIVATE"> Доступ только по ссылке</option>
+    </select>
+    <br/>
+    <label for="video">Видео</label>
+    <input type="file" name="video" id="video" accept="video/*">
+    <br/>
+    <label for="thumbnail">Обложка</label>
+    <input type="file" name="thumbnail" id="thumbnail" accept="image/*">
+    <br/>
+    <button type="submit">Добавить видео</button>
+</form>
+<script>
+    const mainForm = document.querySelector("form")
+    mainForm.addEventListener("submit", e => {
+        e.preventDefault()
+        console.log(mainForm.videoStatus.value)
+        const formData = new FormData(mainForm)
+        const obj = Object.fromEntries(formData.entries())
+
+        const json = JSON.stringify(obj)
+        console.log(json)
+    })
+
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.Role;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
+import io.melakuera.ourtube.exception.OurtubeException;
 import io.melakuera.ourtube.exception.UserAlreadyExistsException;
 import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.security.JwtService;
@@ -181,6 +182,37 @@ public class UserService implements UserDetailsService {
 	public void removeVideosDislike(long commentId, long userId) {
 		userRepo.findUserByIdFetchDislikedVideos(userId)
 				.getDislikedVideos().removeIf(it -> it.getId().equals(commentId));
+	}
+
+	@Transactional(readOnly = false)
+	public String subscribe(long userId, User authUser) {
+		// Находим юзер по id, иначе ошибка
+		User user = userRepo.findById(userId)
+				.orElseThrow(() -> new OurtubeException(
+						String.format("Юзер с ID %s не найден", userId)));
+
+		// Получаем список подписок авторизованного юзера
+		List<User> authUserSubscriptions = userRepo.findUserByIdFetchSubscriptions(
+				authUser.getId()).getSubscriptions();
+
+		// Если этого юзера на которого мы хотим подписаться нету в списке
+		if (authUserSubscriptions.stream().noneMatch(it -> it.getId().equals(userId))) {
+
+			// Подписываемся на него
+			authUserSubscriptions.add(user);
+			return "Подписка поставлена";
+
+			// Иначе убираем подписку
+		} else {
+			authUserSubscriptions.removeIf(it -> it.getId().equals(userId));
+			return "Подписка убрана";
+		}
+	}
+
+	public User findById(long userId) {
+		return userRepo.findById(userId)
+				.orElseThrow(() -> new OurtubeException(
+						String.format("Юзер с ID %s не найден", userId)));
 	}
 }
 
