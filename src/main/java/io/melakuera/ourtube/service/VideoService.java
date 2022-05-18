@@ -2,7 +2,7 @@ package io.melakuera.ourtube.service;
 
 import io.melakuera.ourtube.dto.CommentReqDto;
 import io.melakuera.ourtube.dto.EditVideoReqDto;
-import io.melakuera.ourtube.dto.UploadVideoReqDto;
+import io.melakuera.ourtube.dto.NewVideoReqDto;
 import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
@@ -15,10 +15,15 @@ import io.melakuera.ourtube.repo.UserRepo;
 import io.melakuera.ourtube.repo.VideoRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +38,7 @@ public class VideoService {
 	private final CommentRepo commentRepo;
 
 	@Transactional(readOnly = false)
-	public Video newVideo(UploadVideoReqDto dto, User user) {
+	public Video newVideo(NewVideoReqDto dto, User user) {
 		// Загружаем видео и превью в хранилище
 		String videoName = fileService.uploadVideo(dto.getVideo());
 		String thumbnailName = fileService.uploadThumbnail(dto.getThumbnail());
@@ -43,7 +48,7 @@ public class VideoService {
 		video.setTitle(dto.getTitle());
 		video.setDescription(dto.getDescription());
 		video.setTags(dto.getTags());
-		video.setUser(user);
+		video.setAuthor(user);
 		video.setVideoStatus(VideoStatus.valueOf(dto.getVideoStatus()));
 		video.setVideoName(videoName);
 		video.setThumbnailName(thumbnailName);
@@ -64,7 +69,7 @@ public class VideoService {
 				new VideoNotFoundException(videoId)
 		);
 		// Проверяем является ли авторизованный юзер автором этого видео
-		if (video.getUser().equals(authUser)) {
+		if (video.getAuthor().equals(authUser)) {
 			videoRepo.deleteById(videoId);
 			log.info("Видео {} удалено", videoId);
 			// Иначе он не явл. автором, посему ошибка
@@ -80,7 +85,7 @@ public class VideoService {
 				new VideoNotFoundException(videoId)
 		);
 		// Проверяем является ли авторизованный юзер автором этого видео
-		if (video.getUser().equals(authUser)) {
+		if (video.getAuthor().equals(authUser)) {
 			// Заменяем обложку этого видоса
 			String thumbnailName = fileService.editThumbnail(
 					video.getThumbnailName(), dto.getThumbnail());
@@ -420,5 +425,30 @@ public class VideoService {
 		commentRepo.save(comment);
 
 		return result.toString();
+	}
+
+	public ResponseEntity<?> uploadVideo(MultipartFile video) {
+		Map<String, Object> body = new HashMap<>();
+		try {
+			body.put("videoName", video.getOriginalFilename());
+			body.put("videoType", video.getContentType());
+			body.put("data", video.getBytes());
+		} catch (IOException e) {
+			throw new OurtubeException("Ошибка загрузки видео");
+		}
+		return ResponseEntity.ok(body);
+
+	}
+
+	public ResponseEntity<?> uploadThumbnail(MultipartFile thumbnail) {
+		Map<String, Object> body = new HashMap<>();
+		try {
+			body.put("thumbnailName", thumbnail.getOriginalFilename());
+			body.put("thumbnailType", thumbnail.getContentType());
+			body.put("data", thumbnail.getBytes());
+		} catch (IOException e) {
+			throw new OurtubeException("Ошибка загрузки видео");
+		}
+		return ResponseEntity.ok(body);
 	}
 }

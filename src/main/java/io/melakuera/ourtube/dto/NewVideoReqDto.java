@@ -6,7 +6,7 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
-public class UploadVideoReqDto {
+public class NewVideoReqDto {
 	private String title;
 	private String description;
 	private Set<String> tags;

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -20,17 +21,26 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 public class Video {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid")
 	private Long id;
 	@Column(nullable = false)
 	private String title;
 	private String description;
+
+	@Column(nullable = false)
+	@Lob
+	private byte[] video;
 	@Column(nullable = false)
 	private String videoName;
+	@Column(nullable = false)
+	private long videoSize;
+
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
-	private User user;
+	private User author;
 	private long likesCount = 0;
 	private long dislikesCount = 0;
 	private long viewCount = 0;
@@ -39,8 +49,15 @@ public class Video {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private VideoStatus videoStatus;
+
+	@Column(nullable = false)
+	@Lob
+	private byte[] thumbnail;
 	@Column(nullable = false)
 	private String thumbnailName;
+	@Column(nullable = false)
+	private String thumbnailSize;
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "video")
 	@ToString.Exclude
 	private List<Comment> comments;

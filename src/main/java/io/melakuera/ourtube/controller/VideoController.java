@@ -2,7 +2,7 @@ package io.melakuera.ourtube.controller;
 
 import io.melakuera.ourtube.dto.CommentReqDto;
 import io.melakuera.ourtube.dto.EditVideoReqDto;
-import io.melakuera.ourtube.dto.UploadVideoReqDto;
+import io.melakuera.ourtube.dto.NewVideoReqDto;
 import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
@@ -10,8 +10,10 @@ import io.melakuera.ourtube.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -24,9 +26,22 @@ public class VideoController {
 
 	private final VideoService videoService;
 
+	// TODO а как
+	@PostMapping("/uploadVideo")
+	ResponseEntity<?> uploadVideo(@RequestParam("video") MultipartFile video) {
+
+		return videoService.uploadVideo(video);
+	}
+
+	@PostMapping("/uploadThumbnail")
+	ResponseEntity<?> uploadThumbnail(@RequestParam("thumbnail") MultipartFile thumbnail) {
+
+		return videoService.uploadThumbnail(thumbnail);
+	}
+
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	Video newVideo(UploadVideoReqDto dto, @AuthenticationPrincipal User authUser) {
+	Video newVideo(@RequestBody NewVideoReqDto dto, @AuthenticationPrincipal User authUser) {
 
 		return videoService.newVideo(dto, authUser);
 	}
