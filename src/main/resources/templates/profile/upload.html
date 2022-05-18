@@ -1,45 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Профиль</title>
 </head>
+<style>
+    .popup {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        top: 0;
+        left: 0;
+        z-index: 2;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .popup.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .popup-link {
+        padding: 10px;
+        background-color: aqua;
+    }
+
+    .popup__container {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .popup__body {
+        border-radius: 10px;
+        background-color: aliceblue;
+        padding: 300px 400px;
+        position: relative;
+    }
+
+    .popup__close {
+        position: absolute;
+        right: 10px;
+        top: 4px;
+        text-decoration: none;
+        color: #000;
+        cursor: pointer;
+        font-size: 20px;
+    }
+</style>
+
 <body>
-<form action="/api/videos" enctype="multipart/form-data">
-    <label for="title">Заголовок видео</label>
-    <input type="text" name="title" id="title">
-    <br/>
-    <label for="description">Описание видео</label>
-    <textarea name="description" id="description" cols="30" rows="10"></textarea>
-    <br/>
-    <label for="tags">Теги видео</label>
-    <input type="text" name="tags" id="tags">
-    <br/>
-    <select id="videoStatus">
-        <option value="PUBLIC" selected> Общедоступный</option>
-        <option value="PRIVATE"> Доступ только по ссылке</option>
-    </select>
-    <br/>
-    <label for="video">Видео</label>
-    <input type="file" name="video" id="video" accept="video/*">
-    <br/>
-    <label for="thumbnail">Обложка</label>
-    <input type="file" name="thumbnail" id="thumbnail" accept="image/*">
-    <br/>
-    <button type="submit">Добавить видео</button>
-</form>
-<script>
-    const mainForm = document.querySelector("form")
-    mainForm.addEventListener("submit", e => {
-        e.preventDefault()
-        console.log(mainForm.videoStatus.value)
-        const formData = new FormData(mainForm)
-        const obj = Object.fromEntries(formData.entries())
+    <header name="header" id="header">
+        <a class="popup-link">Добавить видео</a>
+    </header>
+    <div class="body">
 
-        const json = JSON.stringify(obj)
-        console.log(json)
-    })
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam voluptates tenetur repudiandae unde harum quo
+        accusantium, odit animi. Voluptatum fugit odit quod necessitatibus, explicabo similique facere hic dolor ad
+        temporibus!
+        Nostrum, harum. Sint odit laborum obcaecati aliquam exercitationem. Libero saepe atque ducimus voluptatem
+        voluptatum, iure amet. Numquam, at mollitia adipisci nihil odio vitae, autem sequi, architecto magni maxime aut
+        corrupti!
+        Commodi inventore harum doloribus aperiam nemo soluta amet obcaecati, laudantium nesciunt asperiores,
+        consectetur nihil iste illum veniam officiis quidem sequi veritatis illo deleniti consequuntur rerum minima
+        ipsam repellat. Accusantium, numquam?
 
-</script>
+    </div>
+    <div id="popup" class="popup">
+        <div class="popup__container">
+            <div class="popup__body">
+                <a href="" class="popup__close">&#10006</a>
+                <div class="popup__upload-button">
+                    <label for="video"> Загрузка видео</label>
+                    <input type="file" name="video" id="video" accept="video/*">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const popupLink = document.querySelector(".popup-link");
+        const closePopupBtn = document.querySelector(".popup__close");
+        const popup = document.querySelector("#popup");
+
+        popupLink.addEventListener("click", e => {
+            e.preventDefault();
+            popup.classList.add("active");
+        })
+
+        closePopupBtn.addEventListener("click", e => {
+            e.preventDefault();
+            closePopup(popup)
+            
+        })
+
+        function closePopup(currentPopup) {
+            currentPopup.classList.remove("active");
+        }
+
+        const videoInput = document.querySelector("#video")
+        videoInput.addEventListener("change", e => {
+            
+            const video = e.target.files[0];
+            const formData = new FormData();
+            formData.append("video", video)
+
+            fetch("http://localhost:8080/api/videos/uploadVideo", {
+                method: "POST",
+                headers: {
+                    // 'Content-Type': 'multipart/form-data',
+                    "Authorization": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJFbGQxIiwiaWF0IjoxNjUyODc2NzQxLCJleHAiOjE2NTI5NjMxNDF9.5ngPr9kcik7VSGge2OesZcyR3nu-0-A-Cp3W9AROCr4"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error))
+
+            closePopup(popup)
+        });
+    </script>
 </body>
+
 </html>
