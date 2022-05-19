@@ -7,8 +7,8 @@ import io.melakuera.ourtube.entity.Comment;
 import io.melakuera.ourtube.entity.User;
 import io.melakuera.ourtube.entity.Video;
 import io.melakuera.ourtube.service.VideoService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,12 +21,12 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/videos")
 @RequiredArgsConstructor
-@Slf4j
 public class VideoController {
 
 	private final VideoService videoService;
 
 	// TODO а как
+	@Operation(description = "test")
 	@PostMapping("/uploadVideo")
 	ResponseEntity<?> uploadVideo(@RequestParam("video") MultipartFile video) {
 

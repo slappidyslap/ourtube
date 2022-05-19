@@ -48,7 +48,7 @@ public class VideoService {
 		video.setTitle(dto.getTitle());
 		video.setDescription(dto.getDescription());
 		video.setTags(dto.getTags());
-		video.setAuthor(user);
+		video.setUser(user);
 		video.setVideoStatus(VideoStatus.valueOf(dto.getVideoStatus()));
 		video.setVideoName(videoName);
 		video.setThumbnailName(thumbnailName);
@@ -69,7 +69,7 @@ public class VideoService {
 				new VideoNotFoundException(videoId)
 		);
 		// Проверяем является ли авторизованный юзер автором этого видео
-		if (video.getAuthor().equals(authUser)) {
+		if (video.getUser().equals(authUser)) {
 			videoRepo.deleteById(videoId);
 			log.info("Видео {} удалено", videoId);
 			// Иначе он не явл. автором, посему ошибка
@@ -85,7 +85,7 @@ public class VideoService {
 				new VideoNotFoundException(videoId)
 		);
 		// Проверяем является ли авторизованный юзер автором этого видео
-		if (video.getAuthor().equals(authUser)) {
+		if (video.getUser().equals(authUser)) {
 			// Заменяем обложку этого видоса
 			String thumbnailName = fileService.editThumbnail(
 					video.getThumbnailName(), dto.getThumbnail());
