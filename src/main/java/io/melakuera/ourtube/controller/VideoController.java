@@ -25,8 +25,6 @@ public class VideoController {
 
 	private final VideoService videoService;
 
-	// TODO а как
-	@Operation(description = "test")
 	@PostMapping("/uploadVideo")
 	ResponseEntity<?> uploadVideo(@RequestParam("video") MultipartFile video) {
 
@@ -41,9 +39,9 @@ public class VideoController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	Video newVideo(@RequestBody NewVideoReqDto dto, @AuthenticationPrincipal User authUser) {
+	Video newVideo(@RequestBody NewVideoReqDto dto) {
 
-		return videoService.newVideo(dto, authUser);
+		return videoService.newVideo(dto);
 	}
 
 	@DeleteMapping("/{videoId}")

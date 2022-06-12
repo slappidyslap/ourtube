@@ -16,6 +16,7 @@ import io.melakuera.ourtube.repo.VideoRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,23 +39,27 @@ public class VideoService {
 	private final CommentRepo commentRepo;
 
 	@Transactional(readOnly = false)
-	public Video newVideo(NewVideoReqDto dto, User user) {
+	public Video newVideo(NewVideoReqDto dto) {
+		
+		User authUser = (User) 
+				SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
 		// Загружаем видео и превью в хранилище
-		String videoName = fileService.uploadVideo(dto.getVideo());
-		String thumbnailName = fileService.uploadThumbnail(dto.getThumbnail());
+//		String videoName = fileService.uploadVideo(dto.getVideo());
+//		String thumbnailName = fileService.uploadThumbnail(dto.getThumbnail());
 
 		// Создаем нового видео на основе dto
 		Video video = new Video();
 		video.setTitle(dto.getTitle());
 		video.setDescription(dto.getDescription());
 		video.setTags(dto.getTags());
-		video.setUser(user);
+		video.setUser(authUser);
 		video.setVideoStatus(VideoStatus.valueOf(dto.getVideoStatus()));
-		video.setVideoName(videoName);
-		video.setThumbnailName(thumbnailName);
+		video.setVideoName("sdfsda");
+		video.setThumbnailName("fsdaf");
 
 		// Сохраненяем видео и юзера в бд
-		userRepo.save(user);
+		userRepo.save(authUser);
 		videoRepo.save(video);
 
 		// Возвращаем новосозданное видео

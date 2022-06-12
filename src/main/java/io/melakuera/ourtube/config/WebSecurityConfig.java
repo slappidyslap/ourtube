@@ -48,7 +48,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.PATCH, "/api/videos/**").hasAnyAuthority(Role.USER.name(), Role.ADMIN.name())
 				.antMatchers(HttpMethod.GET, "/api/users").hasAuthority(Role.ADMIN.name())
 				.antMatchers("/", "/register", "/api/users/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-				.anyRequest().authenticated();
+				.anyRequest().permitAll();
 	}
 
 	@Bean

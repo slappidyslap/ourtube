@@ -11,6 +11,4 @@ public class NewVideoReqDto {
 	private String description;
 	private Set<String> tags;
 	private String videoStatus;
-	private MultipartFile video;
-	private MultipartFile thumbnail;
 }
